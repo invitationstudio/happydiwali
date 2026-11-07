@@ -682,3 +682,47 @@
     margin: 0 !important;
     box-shadow: 0 0 50px rgba(255, 215, 0, 0.3) !important; /* सोनेरी ग्लो */
 }
+/* ============================================
+   📱 MOBILE VIEW FIX — Letter in Center
+   ============================================ */
+
+@media (max-width: 640px) {
+    /* १. गिफ्ट स्टेजची उंची कमी करा जेणेकरून तो स्क्रीनमध्ये बसू शकेल */
+    .gift-stage {
+        min-height: auto !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 100vh !important; /* पूर्ण स्क्रीन */
+    }
+
+    /* २. गिफ्ट बॉक्सला थोडं वर खेचा */
+    .gift-box {
+        margin: 0 !important;
+        transform: scale(0.8); /* थोडा लहान करा */
+    }
+
+    /* ३. लिफाफा (Letter) अगदी मध्यभागी आणण्यासाठी */
+    .gift-letter-wrap {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        display: flex !important;
+        align-items: center !important; /* उभं मध्यभागी */
+        justify-content: center !important; /* आडवं मध्यभागी */
+        padding: 0 !important;
+        margin: 0 !important;
+        z-index: 99999 !important;
+    }
+
+    .gift-letter {
+        margin: 0 !important;
+        width: 92vw !important; /* स्क्रीनच्या रुंदीएवढा */
+        max-height: 85vh !important; /* स्क्रीनच्या उंचीएवढा */
+        overflow-y: auto !important; /* मेसेज मोठा असेल तर आत स्क्रोल होईल */
+    }
+}
