@@ -1,0 +1,684 @@
+/* ============================================
+   gift.css — Magical 3D Gift Box (PERFORMANCE OPTIMISED)
+   Key performance rules:
+   - NO filter: blur() inside 3D context
+   - will-change only where needed
+   - animations isolated to non-3D wrappers
+   - reduced box-shadow / inset glow on faces
+   ============================================ */
+
+.gift-section {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #050510 0%, #100510 40%, #1a0a05 100%);
+    isolation: isolate;
+    contain: layout style paint;
+}
+
+/* ---------- Background ambience ---------- */
+.gift-ambience {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 50% 40%, rgba(255, 153, 51, 0.10) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(74, 14, 14, 0.55) 0%, transparent 65%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ---------- Burst particle canvas ---------- */
+.gift-particles {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+    /* reduced paint area — canvas ctx clears per frame */
+}
+
+/* ---------- Header ---------- */
+.gift-header {
+    position: relative;
+    z-index: 4;
+    margin-bottom: 1rem;
+}
+
+/* ---------- Stage ---------- */
+.gift-stage {
+    position: relative;
+    z-index: 4;
+    width: min(500px, 90vw);
+    min-height: min(600px, 78vh);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1400px;
+    perspective-origin: 50% 50%;
+    margin: 0 auto;
+    /* Only the box animates — perspective stays fixed */
+}
+
+/* ---------- ANIMATION WRAPPER (NEW!) ----------
+   The breathing animation lives HERE, on a
+   wrapper that is NOT inside the 3D context.
+   This prevents the 3D tree from re-rasterising
+   on every animation frame.
+   ------------------------------------------- */
+.gift-box {
+    position: relative;
+    width: 260px;
+    height: 260px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    /* NB: no transform-style: preserve-3d here — that lives on .gift-3d */
+    transition: transform 0.3s ease;
+    /* Isolate so child effects never cause parent reflow */
+    isolation: isolate;
+    /* Promote to own layer to avoid reflow on hover/animation */
+    will-change: transform;
+}
+
+.gift-box:hover  { transform: scale(1.04); }
+.gift-box:active { transform: scale(0.98); }
+
+.gift-box:focus-visible {
+    outline: 2px dashed #ffd700;
+    outline-offset: 12px;
+    border-radius: 12px;
+}
+
+/* Shake on opening */
+.gift-box.opening {
+    animation: giftShake 0.14s ease-in-out infinite;
+    cursor: default;
+}
+
+@keyframes giftShake {
+    0%, 100% { transform: translate(0, 0) rotateZ(0deg); }
+    25%      { transform: translate(-3px, 2px) rotateZ(-1deg); }
+    75%      { transform: translate(3px, -2px) rotateZ(1deg); }
+}
+
+/* ---------- Glow aura (REWRITTEN — no blur filter!) ----------
+   Instead of a big element with filter: blur(20px),
+   we use a pre-blurred RADIAL GRADIENT. This is
+   rendered once by the GPU and costs almost nothing.
+   We only animate OPACITY — never scale + blur.
+   ---------------------------------------------------------- */
+.gift-box-aura {
+    position: absolute;
+    inset: -50%;
+    border-radius: 50%;
+    background: radial-gradient(circle,
+        rgba(255, 215, 0, 0.38) 0%,
+        rgba(255, 180, 60, 0.22) 25%,
+        rgba(255, 153, 51, 0.10) 45%,
+        rgba(212, 175, 55, 0.03) 65%,
+        transparent 78%);
+    z-index: -1;
+    animation: auraPulse 3.5s ease-in-out infinite;
+    pointer-events: none;
+    /* Lightweight — pure opacity, no filter */
+    will-change: opacity;
+}
+
+@keyframes auraPulse {
+    0%, 100% { opacity: 0.7; }
+    50%      { opacity: 1; }
+}
+
+/* ---------- 3D scene ---------- */
+.gift-3d {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    /* Static base rotation — animated separately via a cheap wrapper */
+    transform: rotateX(-12deg) rotateY(-18deg);
+    will-change: transform;
+    /* Compose on GPU */
+    backface-visibility: hidden;
+}
+
+/* The FLOAT animation is now its own wrapper — see index.html? No wait,
+   we don't need to touch HTML. We can attach it to .gift-3d directly
+   but ONLY when not opening. To keep it smooth, we override in .opening/.opened. */
+.gift-box:not(.opening):not(.opened) .gift-3d {
+    animation: giftFloat 6s ease-in-out infinite;
+}
+
+@keyframes giftFloat {
+    0%, 100% { transform: rotateX(-12deg) rotateY(-18deg) translateY(0); }
+    50%      { transform: rotateX(-12deg) rotateY(-8deg)  translateY(-6px); }
+}
+
+/* ---------- Lid ---------- */
+.gift-lid {
+    position: absolute;
+    top: -22px;
+    left: -10px;
+    width: 280px;
+    height: 40px;
+    transform-style: preserve-3d;
+    transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.6s ease 0.2s;
+    z-index: 5;
+    will-change: transform, opacity;
+}
+
+.gift-box.opened .gift-lid {
+    transform: translateY(-220px) rotateX(-55deg) rotateZ(8deg);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gift-lid-face {
+    position: absolute;
+    background: linear-gradient(135deg, #d4af37 0%, #ffd700 45%, #b8860b 100%);
+    /* Reduced inset shadows — from 2 to 1 */
+    box-shadow: inset 0 0 10px rgba(139, 105, 20, 0.5);
+    backface-visibility: hidden;
+}
+
+.gift-lid-top {
+    top: 0; left: 0;
+    width: 280px;
+    height: 30px;
+    background: linear-gradient(135deg, #ffd700 0%, #d4af37 40%, #b8860b 100%);
+    transform: translateZ(10px);
+    border-radius: 6px;
+    /* Single soft outer glow instead of stacked shadows */
+    box-shadow:
+        inset 0 0 15px rgba(255, 255, 255, 0.35),
+        0 0 25px rgba(255, 215, 0, 0.45);
+}
+
+.gift-lid-front {
+    width: 280px;
+    height: 40px;
+    top: 0; left: 0;
+    transform: rotateX(-90deg);
+    transform-origin: top center;
+    background: linear-gradient(180deg, #b8860b 0%, #8b6914 100%);
+}
+
+.gift-lid-left,
+.gift-lid-right {
+    width: 40px;
+    height: 30px;
+    top: 0;
+    background: linear-gradient(180deg, #b8860b 0%, #8b6914 100%);
+}
+
+.gift-lid-left {
+    left: -40px;
+    transform: rotateY(-90deg) translateZ(20px);
+    transform-origin: right center;
+}
+
+.gift-lid-right {
+    right: -40px;
+    transform: rotateY(90deg) translateZ(20px);
+    transform-origin: left center;
+}
+
+.gift-lid-back {
+    width: 280px;
+    height: 30px;
+    top: 0; left: 0;
+    transform: rotateX(90deg) translateY(-30px);
+    transform-origin: top center;
+    background: linear-gradient(180deg, #6b4f10 0%, #8b6914 100%);
+}
+
+/* ---------- Bow ---------- */
+.gift-bow {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    width: 100px;
+    height: 60px;
+    transform: translateX(-50%) translateZ(20px);
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease, opacity 0.4s;
+    will-change: transform, opacity;
+}
+
+.gift-box.opened .gift-bow {
+    transform: translateX(-50%) translateY(-60px) translateZ(20px) rotateZ(25deg);
+    opacity: 0;
+}
+
+.bow-loop {
+    position: absolute;
+    top: 6px;
+    width: 46px;
+    height: 34px;
+    background: linear-gradient(135deg, #ffd700 0%, #d4af37 50%, #8b6914 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    /* Single shadow — was 2 */
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.55);
+}
+
+.bow-loop-left  { left: 0;  transform: rotate(-25deg); }
+.bow-loop-right { right: 0; transform: rotate(25deg); }
+
+.bow-knot {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 22px;
+    background: radial-gradient(circle at 30% 30%, #fff8d0, #d4af37 60%, #8b6914 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.75);
+    z-index: 2;
+}
+
+.bow-tail {
+    position: absolute;
+    top: 30px;
+    width: 14px;
+    height: 22px;
+    background: linear-gradient(180deg, #d4af37 0%, #8b6914 100%);
+}
+
+.bow-tail-left  { left: 22px;  transform: rotate(-8deg); clip-path: polygon(0 0, 100% 0, 70% 100%, 30% 90%); }
+.bow-tail-right { right: 22px; transform: rotate(8deg);  clip-path: polygon(0 0, 100% 0, 70% 90%, 30% 100%); }
+
+/* ---------- Body ---------- */
+.gift-body {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    margin-top: 8px;
+}
+
+.gift-face {
+    position: absolute;
+    background: linear-gradient(160deg, #d4af37 0%, #b8860b 50%, #8b6914 100%);
+    /* Single inset instead of 2 stacked */
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.32);
+    backface-visibility: hidden;
+}
+
+.gift-face-front,
+.gift-face-back {
+    width: 240px;
+    height: 240px;
+    left: 10px;
+    top: 10px;
+}
+
+.gift-face-front { transform: translateZ(120px); }
+.gift-face-back  {
+    transform: rotateY(180deg) translateZ(120px);
+    background: linear-gradient(160deg, #b8860b 0%, #8b6914 100%);
+}
+
+.gift-face-left,
+.gift-face-right {
+    width: 240px;
+    height: 240px;
+    top: 10px;
+    left: 10px;
+}
+
+.gift-face-left {
+    transform: rotateY(-90deg) translateZ(120px);
+    background: linear-gradient(160deg, #8b6914 0%, #6b4f10 100%);
+}
+
+.gift-face-right {
+    transform: rotateY(90deg) translateZ(120px);
+    background: linear-gradient(160deg, #b8860b 0%, #8b6914 100%);
+}
+
+.gift-face-bottom {
+    width: 240px;
+    height: 240px;
+    top: 130px;
+    left: 10px;
+    transform: rotateX(90deg) translateZ(120px);
+    background: #4a3410;
+}
+
+/* Vertical ribbon on front face */
+.ribbon-v {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 34px;
+    height: 100%;
+    background: linear-gradient(180deg, #fff8d0 0%, #ffd700 40%, #d4af37 100%);
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.55);
+    transition: transform 0.8s ease, opacity 0.6s ease 0.3s;
+}
+
+.gift-box.opened .ribbon-v {
+    transform: translateX(-50%) scaleY(0.9);
+    opacity: 0.3;
+}
+
+/* ---------- Tap hint ---------- */
+.gift-tap-hint {
+    position: absolute;
+    bottom: -56px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.28em;
+    color: rgba(255, 215, 0, 0.75);
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+    white-space: nowrap;
+    animation: hintPulse 2s ease-in-out infinite;
+    transition: opacity 0.4s;
+    pointer-events: none;
+}
+
+.gift-box.opened .gift-tap-hint { opacity: 0; }
+
+@keyframes hintPulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+}
+
+/* ============================================
+   THE FLOATING LETTER
+   ============================================ */
+.gift-letter-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 6;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.gift-letter-wrap.visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.gift-letter {
+    position: relative;
+    width: min(520px, 92vw);
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 2.5rem 2rem 1.6rem;
+    background:
+        linear-gradient(180deg, rgba(255, 248, 220, 0.98) 0%, rgba(255, 240, 200, 0.96) 100%);
+    border-radius: 6px;
+    color: #3a1f00;
+    font-family: 'Tiro Devanagari Marathi', serif;
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.7),
+        0 0 30px rgba(255, 215, 0, 0.35);
+    transform: translateY(30px) rotateX(-40deg) scale(0.85);
+    transform-origin: top center;
+    opacity: 0;
+    transition:
+        transform 1s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.7s ease;
+    border: 2px solid #d4af37;
+    outline: 1px solid rgba(139, 105, 20, 0.4);
+    outline-offset: -8px;
+    -webkit-overflow-scrolling: touch;
+    will-change: transform, opacity;
+}
+
+.gift-letter::before,
+.gift-letter::after {
+    content: '';
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 2px solid #b8860b;
+    border-radius: 50%;
+    opacity: 0.6;
+}
+
+.gift-letter::before {
+    top: 8px; left: 8px;
+    border-right: none; border-bottom: none;
+    border-radius: 8px 0 0 0;
+}
+
+.gift-letter::after {
+    bottom: 8px; right: 8px;
+    border-left: none; border-top: none;
+    border-radius: 0 0 8px 0;
+}
+
+.gift-letter-wrap.visible .gift-letter {
+    transform: translateY(0) rotateX(0deg) scale(1);
+    opacity: 1;
+}
+
+.letter-decoration {
+    text-align: center;
+    color: #b8860b;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    opacity: 0.75;
+    margin: 0.3rem 0;
+}
+
+.letter-decoration-top    { margin-bottom: 1.1rem; }
+.letter-decoration-bottom { margin-top: 1rem; }
+
+.letter-line {
+    margin: 0 0 1rem;
+    font-size: clamp(1rem, 2.4vw, 1.15rem);
+    line-height: 1.85;
+    color: #3a1f00;
+    text-align: center;
+    transition: background 0.4s ease, color 0.4s ease;
+    border-radius: 4px;
+    padding: 0.35rem 0.5rem;
+}
+
+.letter-line.speaking {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.28), rgba(255, 153, 51, 0.22));
+    color: #1a0f00;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.35);
+    font-weight: 500;
+}
+
+.letter-closing {
+    font-size: clamp(1.15rem, 3vw, 1.5rem);
+    font-weight: 600;
+    color: #6b4f10;
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+    margin-top: 1rem;
+    margin-bottom: 0.4rem;
+}
+
+.letter-voice-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed rgba(139, 105, 20, 0.4);
+}
+
+.letter-voice-btn {
+    font-family: 'Mukta', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(212, 175, 55, 0.15);
+    color: #4a3410;
+    border: 1px solid rgba(139, 105, 20, 0.5);
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.letter-voice-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ffd700, #d4af37);
+    color: #1a0f00;
+    box-shadow: 0 3px 12px rgba(255, 215, 0, 0.55);
+}
+
+.letter-voice-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.gift-letter-close {
+    display: block;
+    margin: 1rem auto 0;
+    padding: 10px 26px;
+    font-family: 'Mukta', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #6b4f10;
+    background: transparent;
+    border: 2px solid #d4af37;
+    border-radius: 999px;
+    transition: background 0.25s ease, color 0.25s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.gift-letter-close:hover {
+    background: linear-gradient(135deg, #ffd700, #d4af37);
+    color: #1a0f00;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .gift-box,
+    .gift-3d,
+    .gift-box-aura,
+    .gift-tap-hint { animation: none !important; }
+
+    .gift-box.opening { animation: none !important; }
+
+    .gift-box.opened .gift-lid {
+        transform: translateY(-220px);
+        transition: transform 0.3s ease;
+    }
+
+    .gift-box-aura { animation: none !important; opacity: 0.9; }
+}
+
+/* ---------- Mobile tweaks ---------- */
+@media (max-width: 640px) {
+    .gift-stage {
+        min-height: 380px;
+        perspective: 900px;
+    }
+    .gift-box {
+        width: 220px;
+        height: 220px;
+        transform: scale(0.86);
+        transform-origin: center;
+    }
+    .gift-box:hover { transform: scale(0.9); }
+    .gift-tap-hint { bottom: -38px; font-size: 0.7rem; }
+    .gift-letter {
+        padding: 2rem 1.2rem 1.2rem;
+        max-height: 72vh;
+    }
+    .letter-voice-controls { gap: 4px; }
+    .letter-voice-btn { font-size: 0.7rem; padding: 6px 9px; }
+}
+
+@media (max-width: 400px) {
+    .gift-box { transform: scale(0.72); }
+    .gift-box:hover { transform: scale(0.76); }
+}
+/* ============================================
+   🎁 NEW PNG GIFT BOX STYLES
+   ============================================ */
+
+.gift-png-img {
+    width: 135%;
+    max-width: 350px;
+    height: auto;
+    object-fit: contain;
+    border-radius: 16px;
+    filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.3));
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    display: block;
+    margin: -20px;
+    margin-top: -130px;
+}
+
+/* होव्हर केल्यावर थोडं मोठं होईल */
+.gift-box:hover .gift-png-img {
+    transform: scale(1.05);
+}
+
+/* जेव्हा बॉक्स उघडेल (opened) तेव्हा PNG ला हलकीशी शेक इफेक्ट */
+.gift-box.opened .gift-png-img {
+    animation: pngPop 0.6s ease-out forwards;
+}
+
+@keyframes pngPop {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.15) rotate(5deg); }
+    100% { transform: scale(0.9) rotate(0deg); opacity: 0.8; }
+}
+/* ============================================
+   ✍️ LETTER SIGNATURE (डाव्या बाजूला नाव)
+   ============================================ */
+
+.letter-signature {
+    font-family: 'Tiro Devanagari Marathi', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    font-style: italic;
+    color: #8b6914;
+    text-align: right;       /* 👈 डावीकडे आणण्यासाठी */
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;     /* 👈 डावीकडून थोडं अंतर */
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+/* मोबाईलवर थोडं लहान दिसावं म्हणून */
+@media (max-width: 640px) {
+    .letter-signature {
+        font-size: 1.05rem;
+        margin-top: 1rem;
+    }
+}
+/* ============================================
+   🎯 LETTER PERFECTLY IN CENTER (मध्यभागी आणण्यासाठी)
+   ============================================ */
+
+.gift-letter-wrap {
+    position: fixed !important; /* absolute ऐवजी fixed केल्याने ते पूर्ण स्क्रीनला कव्हर करेल */
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important; /* सगळ्यात वर दिसण्यासाठी */
+    
+    /* मागचा भाग थोडा काळा (Transparent) होईल जेणेकरून लिफाफा उठून दिसेल */
+    background: rgba(0, 0, 0, 0.6) !important; 
+    backdrop-filter: blur(5px); /* मागचा भाग हलका धूसर होईल */
+}
+
+.gift-letter {
+    /* लिफाफा स्क्रीनच्या बाहेर जाऊ नये म्हणून */
+    max-height: 85vh !important; 
+    margin: 0 !important;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.3) !important; /* सोनेरी ग्लो */
+}
