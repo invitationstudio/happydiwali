@@ -434,6 +434,7 @@
     outline-offset: -8px;
     -webkit-overflow-scrolling: touch;
     will-change: transform, opacity;
+    margin-top: -50%;
 }
 
 .gift-letter::before,
@@ -657,5 +658,60 @@
     .letter-signature {
         font-size: 1.05rem;
         margin-top: 1rem;
+    }
+}
+/* ============================================
+   🎯 LETTER PERFECTLY IN CENTER (मध्यभागी आणण्यासाठी)
+   ============================================ */
+
+.gift-letter-wrap {
+    position: fixed !important; /* absolute ऐवजी fixed केल्याने ते पूर्ण स्क्रीनला कव्हर करेल */
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important; /* सगळ्यात वर दिसण्यासाठी */
+    
+    /* मागचा भाग थोडा काळा (Transparent) होईल जेणेकरून लिफाफा उठून दिसेल */
+    background: rgba(0, 0, 0, 0.6) !important; 
+    backdrop-filter: blur(5px); /* मागचा भाग हलका धूसर होईल */
+}
+
+.gift-letter {
+    /* लिफाफा स्क्रीनच्या बाहेर जाऊ नये म्हणून */
+    max-height: 85vh !important; 
+    margin: 0 !important;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.3) !important; /* सोनेरी ग्लो */
+    margin-top: 50%;
+}
+    /* ============================================
+   📱 MOBILE VIEW FIX — लिफाफा अगदी मध्यभागी
+   ============================================ */
+
+@media (max-width: 640px) {
+    .gift-letter-wrap {
+        position: fixed !important;
+        top: -250px !important;
+        left: -18px !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        display: flex !important;
+        align-items: center !important;     /* 👈 लिफाफा मध्यभागी आणण्यासाठी */
+        justify-content: center !important; 
+        padding: 0 !important;
+        margin: 0 !important;
+        z-index: 99999 !important;
+    }
+
+    .gift-letter {
+        margin: 0 !important;
+        width: 92vw !important;
+        max-height: 80vh !important; /* 👈 उंची कमी केली जेणेकरून स्क्रीनमध्ये बसेल */
+        overflow-y: auto !important; /* मजकूर मोठा असेल तर आत स्क्रोल होईल */
+    }
+    
+    /* लिफाफा उघडल्यावर मागचं "Happy Diwali" हेडिंग लपवण्यासाठी */
+    .gift-header {
+        display: none !important;
     }
 }
