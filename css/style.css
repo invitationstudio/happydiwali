@@ -1,0 +1,137 @@
+/* ============================================
+   style.css — Core Layout (FIXED)
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    background: #0a0a0a;
+    color: #f5e6c8;
+    font-family: 'Mukta', sans-serif;
+}
+
+.section-shell {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 32px;
+    border-radius: 999px;
+    font-family: 'Mukta', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #ffd700;
+    border: 2px solid #d4af37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+}
+
+.btn-outline:hover {
+    background: rgba(212, 175, 55, 0.15);
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+}
+
+/* Loading Screen */
+.loading-screen {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: grid;
+    place-items: center;
+    z-index: 10000;
+    transition: opacity 0.8s ease, visibility 0.8s;
+}
+
+.loading-screen.fade-out {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.loading-diya {
+    font-size: 4rem;
+    animation: bounce 2s infinite;
+    text-align: center;
+}
+
+.loading-text {
+    font-family: 'Tiro Devanagari Marathi', serif;
+    font-size: 2rem;
+    color: #ffd700;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.loading-bar {
+    width: 200px;
+    height: 3px;
+    background: rgba(212, 175, 55, 0.2);
+    margin: 1rem auto;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.loading-bar-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: #ffd700;
+    animation: load 1.8s forwards;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes load {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+/* Hide scrollbars */
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
+
+/* ============================================
+   LOADING DIYA PNG FIX
+   ============================================ */
+
+.loading-diya {
+    /* जुन्या इमोजीचा फॉन्ट साईज काढून टाका */
+    font-size: 0 !important; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.loading-diya-img {
+    width: 80px; /* तुम्हाला दिवा मोठा हवा असेल तर हा आकडा वाढवा (उदा. 100px) */
+    height: auto;
+    object-fit: contain;
+    animation: bounce 2s infinite;
+    filter: drop-shadow(0 0 15px rgba(255, 153, 51, 0.8));
+}

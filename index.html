@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>॥ शुभ दीपावली ॥ | Ultimate Diwali Experience 2026</title>
+    <meta name="description" content="Ultimate Diwali Interactive Experience 2026">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Tiro+Devanagari+Marathi:ital@0;1&family=Mukta:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/opening.css">
+    <link rel="stylesheet" href="css/welcome.css">
+    <link rel="stylesheet" href="css/gift.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-inner">
+            <div class="loading-diya">
+                <!-- तुमचा दिवा (PNG) -->
+                <img src="assets/images/diyas/diya-loading.png" alt="Diya" class="loading-diya-img" onerror="this.style.display='none'; this.parentNode.innerHTML='🪔';">
+            </div>
+            <div class="loading-text">॥ शुभ दीपावली ॥</div>
+            <div class="loading-bar"><span class="loading-bar-fill"></span></div>
+        </div>
+    </div>
+
+    <!-- ===== OPENING SCREEN ===== -->
+    <section id="opening-screen" class="opening-screen">
+        <div class="opening-stars"></div>
+        <canvas id="opening-particles" class="opening-particles"></canvas>
+        <canvas id="opening-sparks" class="opening-sparks"></canvas>
+        
+        <button id="opening-cracker" class="opening-cracker" aria-label="Tap to light">
+            <span class="opening-cracker-glow"></span>
+            <!-- तुमचा बॉम्ब (PNG) -->
+            <img id="opening-cracker-img" class="opening-cracker-img" src="assets/images/firecrackers/main-cracker.png" alt="Cracker" onerror="this.style.display='none'; document.getElementById('opening-cracker-placeholder').style.display='flex';">
+            <span id="opening-cracker-placeholder" class="opening-cracker-placeholder">🧨</span>
+        </button>
+
+        <p id="opening-instruction" class="opening-instruction">TAP TO BOMB THE MAGIC</p>
+        <div id="opening-flash" class="opening-flash"></div>
+        <div id="opening-shockwave" class="opening-shockwave"></div>
+    </section>
+
+    <!-- ===== WELCOME SCREEN ===== -->
+    <section id="welcome-screen" class="welcome-screen section-shell" style="display: none;">
+        <div class="welcome-sky"></div>
+        <div class="welcome-stars"></div>
+        <canvas id="welcome-fireworks" class="welcome-fireworks"></canvas>
+        <div class="welcome-content">
+            <div class="welcome-title">
+    <img src="assets/images/backgrounds/main-heading.png" alt="Shubh Deepavali" class="heading-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <!-- खालील मजकूर फक्त तेव्हाच दिसेल जेव्हा इमेज लोड होणार नाही -->
+    <h1 class="welcome-title-inner" style="display: none;">॥ शुभ दीपावली ॥</h1>
+</div>
+            <h2 class="welcome-subtitle"><span class="welcome-subtitle-inner">दिवाळीच्या हार्दिक शुभेच्छा!</span></h2>
+            <div class="welcome-divider"><span class="divider-line"></span><span class="divider-om">🪔</span><span class="divider-line"></span></div>
+            <p class="welcome-description">तुमच्या आयुष्यात सुख, समृद्धी, आनंद आणि भरभराटीचा प्रकाश सदैव राहो.</p>
+            <button class="btn btn-outline welcome-cta" onclick="openGiftScreen()">Open Your Gift</button>
+        </div>
+    </section>
+
+    <!-- ===== GIFT SCREEN ===== -->
+    <section id="gift-section" class="gift-section section-shell" style="display: none;">
+        <div class="gift-ambience"></div>
+        <canvas id="gift-particles" class="gift-particles"></canvas>
+        
+        <header class="section-header gift-header">
+            <h2 class="section-title">Happy Diwali</h2>
+        </header>
+
+        <div class="gift-stage">
+            <!-- तुमचा गिफ्ट बॉक्स (PNG) -->
+            <div class="gift-box" id="gift-box">
+                <span class="gift-box-aura"></span>
+                <img 
+                    src="assets/images/gifts/gift-box.png" 
+                    alt="Diwali Gift" 
+                    class="gift-png-img"
+                    onerror="this.src='https://via.placeholder.com/250x250/141414/ffd700?text=Gift+Box+PNG+Missing'"
+                >
+                <p class="gift-tap-hint">TAP TO OPEN</p>
+            </div>
+
+            <!-- लिफाफा (Letter) -->
+            <div class="gift-letter-wrap" id="gift-letter-wrap">
+                <article class="gift-letter">
+                    <p class="letter-line">तुम्हाला आणि तुमच्या संपूर्ण परिवाराला दिवाळीच्या मनःपूर्वक शुभेच्छा.</p>
+                    <p class="letter-line">तुमच्या जीवनात सुख, शांती, समाधान, आरोग्य आणि समृद्धी नांदो.</p>
+                    <p class="letter-line">प्रत्येक दिवस आनंदाचा आणि प्रत्येक क्षण उत्साहाचा जावो.</p>
+                    <p class="letter-line">ही दिवाळी तुमच्यासाठी नवीन संधी, नवीन स्वप्ने आणि भरभराट घेऊन येवो.</p>
+                    <p class="letter-line letter-closing">॥ शुभ दीपावली ॥</p>
+                    <p class="letter-signature">- Prathamesh Khedekar </p>
+                    <button class="gift-letter-close" id="gift-letter-close">✕ Close</button>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="js/audio.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/opening.js"></script>
+    <script src="js/fireworks.js"></script>
+    <script src="js/welcome.js"></script>
+    <script src="js/gift.js"></script>
+</body>
+</html>
